@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>АТБ Магазин</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <a href="/index.html" class="btn btn-link">На головну</a>
+        <h1 class="text-center">Реєстрація</h1>
+
+        <form class="col-6 mx-auto" id="registerForm" novalidate>
+
+            <div class="mb-3">
+                <label for="firstName" class="form-label">І'мя</label>
+                <input type="text" class="form-control" id="firstName" required>
+                <p class="invalid-feedback">Введіть імя</p>
+                <p class="valid-feedback">Гарне імя!</p>
+            </div>
+
+            <div class="mb-3">
+                <label for="secondName" class="form-label">Прізвище</label>
+                <input type="text" class="form-control" id="secondName" required>
+                <p class="invalid-feedback">Введіть прізвище</p>
+                <p class="valid-feedback">Гарне прізвище!</p>
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Емейл</label>
+                <input type="email" class="form-control" id="email" required>
+                <p class="invalid-feedback">Введіть емейл</p>
+                <p class="valid-feedback">Все вірно</p>
+            </div>
+
+            <div class="mb-3">
+                <label for="phone" class="form-label">Телефон</label>
+                <input type="text" class="form-control" id="phone" required>
+                <p class="invalid-feedback">Введіть номер телефону</p>
+                <p class="valid-feedback">Все супер</p>
+            </div>
+
+
+            <div class="mb-3">
+                <label for="photo">Фото</label>
+                <input type="file" class="form-control" id="photo" required accept="image/*">
+                <p class="invalid-feedback">Оберіть аватарку</p>
+            </div>
+
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Пароль</label>
+                <input type="password" class="form-control" id="password" required>
+                <p class="invalid-feedback">Введіть пароль</p>
+                <p class="valid-feedback">Все добре</p>
+            </div>
+
+            <div class="mb-3">
+                <label for="confirmPassword" class="form-label">Підтвердіть пароль</label>
+                <input type="password" class="form-control" id="confirmPassword" required>
+                <p class="invalid-feedback">Підтвердіть пароль</p>
+                <p class="valid-feedback">Все бомба</p>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Реєстрація</button>
+            <a href="/profile.html" class="btn btn-link mt-3">Перейти до профілю JWT</a>
+
+        </form>
+    </div>
+
+    <script src="/js/axios.min.js"></script>
+    <script src="https://unpkg.com/imask"></script>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const element = document.getElementById('phone');
+        const maskOptions = {
+            mask: "+(380) 00 000 00 00"
+        }
+        const mask = IMask(element,maskOptions)
+
+        var form = document.getElementById("registerForm");
+        form.addEventListener('submit', function(event){
+            event.preventDefault();
+            if(!form.checkValidity()){
+                form.classList.add('was-validated');
+                return;
+            }
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirmPassword").value
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            const name = document.getElementById('firstName').value;
+            const secondName = document.getElementById('secondName').value;
+
+            const file=document.getElementById('photo').files[0];
+            if(file){
+                console.log("Ви обрали такий файл:",file);
+                if(file.type.startsWith("image/")){
+                    const limit = 5*1024*1024;
+                    if(file.size<=limit){
+                        const reader = new FileReader();
+                        reader.onload = function(e){
+                            const result = e.target.result;
+                             var sendData ={
+                                secondName,
+                                firstName:name,
+                                email,
+                                phone,
+                                password,
+                                confirmPassword,
+                                photo:result
+                            }
+                            
+                            console.log('Дані файлу у форматі Base64', result)
+                            axios.post('https://lohika.itstep.click/api/account/register', sendData)
+                            .then(resp=>{
+                                console.log("resp", resp)
+                                const token = resp.data.token;
+                                document.cookie = `jwt=${token}`
+                            })
+                            .catch(error =>{
+                                console.log("error", error)
+                            });
+                        }
+                        reader.readAsDataURL(file)
+                    }
+                    else{
+                        alert('Файл завеликий, оберіть інший')
+                    }
+                }
+                else{
+                    alert('Оберіть файл зображення')
+                }
+            }
+            else{
+                alert('Файл не обрано')
+            }
+        });
+    </script>
+</body>
+</html>
