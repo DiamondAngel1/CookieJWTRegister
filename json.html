@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>АТБ Магазин</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1 class="text-center">користувачі з JSON</h1>
+
+    <div class="container">
+        <a href="/register.html" class="btn btn-link">На головну</a>
+        <div class="row">
+            <div class="col-9 mx-auto">
+                <h1 class="text-center">Користувачі</h1>
+                <div class="col-6">
+                    <button class="btn btn-primary" onclick="loadXHR()">XMLHttpRequest</button>
+                    <button class="btn btn-primary" onclick="loadFetch()">Fetch</button>
+                    <button class="btn btn-primary" onclick="loadAxios()">Axios</button>
+                </div>
+
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Image</th>
+                            <th>PIB</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersList">
+                
+                    </tbody>
+                </table>
+                <div id="loading"></div>
+
+            </div>
+        </div>
+    </div>
+
+
+    
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/axios.min.js"></script>
+    <script>
+    const serverUrlRequest = 'https://lohika.itstep.click/api/Users/all';
+    const usersTableBody = document.getElementById("usersList");
+    const loading = document.getElementById("loading");
+
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", serverUrlRequest, true);
+    
+
+    const viewListUsers = (listUsers) => {
+        usersTableBody.innerHTML = "";
+        listUsers.forEach((user, index) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td>
+                    <img src="https://lohika.itstep.click/images/100_${user.photo}" alt="${user.photo}">
+                </td>
+                <td>${user.firstName} ${user.secondName}</td>
+                <td>${user.phone}</td>
+                <td>${user.email}</td>
+                <td>
+                    <button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})">Видалити</button>
+                </td>
+            `;
+
+                usersList.appendChild(tr);
+        })
+    }
+
+    function show() {
+        loading.style.display = "flex";
+    }
+
+    function hide() {
+        setTimeout(() => {
+            loading.style.display = "none";
+        }, 2000);
+    }
+
+    function loadXHR() {
+        show();
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", serverUrlRequest, true);
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                const users = JSON.parse(xhr.responseText);
+                viewListUsers(users);
+            }
+            hide();
+        };
+        xhr.onerror = hide;
+        xhr.send();
+    }
+
+    function loadFetch() {
+        show();
+        fetch(serverUrlRequest)
+        .then(response => response.json())
+        .then(users => {
+            viewListUsers(users);
+            hide();
+        })
+        .catch(() => hide());
+    }
+
+    function loadAxios() {
+        show();
+        axios.get(serverUrlRequest)
+        .then(response => {
+            viewListUsers(response.data);
+            hide();
+        })
+        .catch(() => hide());
+    }
+
+    function deleteUser(id) {
+        if (confirm("Впевнені що хочете видалити цього бобра???")) {
+            axios.delete(`https://lohika.itstep.click/api/Users/delete/${id}`)
+            .then(() => {
+                alert("Користувача видалено");
+                loadAxios();
+            })
+            .catch((error) => {
+                console.error("Помилка при видаленні:", error);
+                alert("Не вдалося видалити користувача. Можливо, немає прав.");
+            });
+
+        }
+    }
+
+    </script>
+
+
+
+    <script>
+        const student = {
+            name:"Pedro",
+            age:"19",
+            isMarried: false,
+            scores:[90,100,85],
+            address:{
+                country:"Ukraine",
+                city:"lutsk",
+                houseNumber: 18
+            }
+        };
+
+        console.log("Обєкт студента: ",student);
+
+        const studentJSON = JSON.stringify(student);
+        console.log("Студент JSON:",studentJSON);
+
+        const parsedStudent = JSON.parse(studentJSON);
+        console.log("Розпарсений студент:",parsedStudent)
+
+    </script>
+</body>
+</html>
